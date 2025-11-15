@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export default function App() {
   const [text, setText] = useState(""); // 入力された文字列を保持する（追加用）
-  const [logs, setLogs] = useState<string[]>([]); // ログの配列を保持する
+  const [logs, setLogs] = useState<string[]>([]); // ログの配列を保持する  ※setLogs→logs の順で実行される訳ではない。set〇〇はあくまでreactにリクエストするだけ
 
   const [editIndex, setEditIndex] = useState<number | null>(null); // 編集中の行番号（なければ null）
   const [editText, setEditText] = useState(""); // 編集用テキスト
@@ -26,8 +26,9 @@ export default function App() {
 
     const newLogs = [...logs, t];
     setLogs(newLogs);
-    localStorage.setItem("logs", JSON.stringify(newLogs)); // 配列を文字列に変換して保存
-
+    localStorage.setItem("logs", JSON.stringify(newLogs)); 
+  // ローカルストレージは文字列しか保存できないため、JSON.stringifyで文字列に変換
+  
     setText(""); // 入力欄クリア
   };
 
@@ -40,9 +41,6 @@ export default function App() {
     const t = editText.trim();
     if (!t) return; // 空文字なら何もしない
 
-
-
-    // 編集した内容で logs 配列を更新（map：配列を1つずつ見て新しい配列を作る）
     const newLogs = logs.map((log, index) =>
       index === editIndex ? t : log
     );
@@ -67,8 +65,8 @@ export default function App() {
 
 
 
-  // 指定した index のログを削除する関数
-  const handleDelete = (index: number) => {
+  // 指定した index のログを削除する関数 
+  const handleDelete = (index: number) => {   // returnが無い為、戻り値の型付けは不要 :void(省略可)
     // filter：条件に合うものだけ残して新しい配列を作る
     const newLogs = logs.filter((_, i) => i !== index);
     setLogs(newLogs);
@@ -116,7 +114,7 @@ export default function App() {
 
 
       {/* 追加 / 保存ボタン（モードで出し分け） */}
-      <button onClick={editIndex === null ? addLog : updateLog}>
+      <button onClick={editIndex === null ? addLog : updateLog}> {/* 条件  ?  trueの場合 : falseの場合 実行される */}
         {editIndex === null ? "追加" : "保存"}
       </button>
 
