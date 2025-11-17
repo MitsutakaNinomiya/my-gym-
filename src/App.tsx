@@ -87,53 +87,66 @@ export default function App() {
       <h1>筋トレログ</h1>
 
 
-
-      {/* 追加と編集で共通の入力欄 */}
-      <input
-        value={editIndex === null ? text : editText}
-        onChange={(e) => {
-          const v = e.target.value;
-          if (editIndex === null) {
-            setText(v);      // 追加モード
-          } else {
-            setEditText(v);  // 編集モード
-          }
-        }}
+      {/* 追加の入力欄 */}
+      <input 
+        value={text} 
+        onChange={(e) => setText(e.target.value)} 
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            if (editIndex === null) {
-              addLog();     // 追加
-            } else {
-              updateLog();  // 保存（更新）
-            }
+            addLog(); //もし入力されたキーがエンターキーの場合に、addLog関数を実行する。
           }
         }}
         placeholder="ここに入力してください"
       />
 
-
-
-      {/* 追加 / 保存ボタン（モードで出し分け） */}
-      <button onClick={editIndex === null ? addLog : updateLog}> {/* 条件  ?  trueの場合 : falseの場合 実行される */}
-        {editIndex === null ? "追加" : "保存"}
-      </button>
+      <button onClick={addLog}>追加</button>
+      
 
       <ul>
         {logs.map((log, index) => (
+
           <li
             key={index}
-            style={{ display: "flex", gap: "8px", alignItems: "center" }}
+            style={{ display: "flex", gap: "10px", alignItems: "center" }}
           >
-            <span>{log}</span>
 
-            {/* 編集ボタン */}
-            <button onClick={() => startEdit(index, log)}>編集</button>
+          {editIndex === index ? (
+        // ✅ ここが「編集中の行」の表示
+        <>
+        <input 
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              updateLog(); 
+            }
+          }}
+        />
+          <button onClick={updateLog}>保存</button>
+          <button onClick={() => {
+            setEditIndex(null);
+            setEditText("");
+          }}>
+            戻る
+          </button>
+        </>
 
-            {/* 削除ボタン */}
-            <button onClick={() => handleDelete(index)}>削除</button>
-          </li>
-        ))}
-      </ul>
+        ) : (
+        // ✅ ここが「ふつうの行」の表示
+        <>
+          <span>{log}</span>
+
+          {/* 編集ボタン */}
+          <button onClick={() => startEdit(index, log)}>編集</button>
+
+          {/* 削除ボタン */}
+          <button onClick={() => handleDelete(index)}>削除</button>
+        </>
+      )}
+    </li>
+  ))}
+</ul>
+
     </div>
   );
 }
