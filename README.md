@@ -1,5 +1,39 @@
 # React + TypeScript + Vite
 
+# GYM-APP ver.1.0
+
+React + TypeScript で作成した筋トレログアプリです。  
+部位 → 種目 → 重量 → 回数 を入力して、日ごとのトレーニングを記録できます。
+
+---
+
+##  機能
+- 部位ごとの種目選択
+- 重量・回数入力
+- トレーニングログの追加
+- ローカルストレージ保存（ブラウザにデータ保持）
+- ログの編集 / 削除
+- 今日の日付の表示
+- Tailwind CSS を使ったシンプルなUI
+
+---
+
+##  使用技術
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+
+
+##  今後のアップデート予定
+- カレンダー画面
+- 日別ログ管理
+- グラフ表示（重量推移）
+- Supabase 連携
+
+---
+
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
