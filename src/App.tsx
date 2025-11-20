@@ -27,14 +27,30 @@ const EXERCISES_BY_PART: Record<string, string[]> = {
 }
 
 
+// ランダムなIDを生成する関数 もしcryptoがundefinedでなく、かつcryptoオブジェクトにrandomUUIDメソッドがあればtrue
+const createId = () => { 
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) { //typeof crypto === "object" && "randomUUID" in crypto でも正しく見えるし、実際多くの環境でも動くが、厳密にはcryptoがnullやfunctionの場合があるため、typeof crypto !== "undefined"の方が安全
+    return crypto.randomUUID(); // UUIDを生成
+  }
+  // UUID非対応環境向けのフォールバック
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
 
 
 // ------------ メインコンポーネント ------------
 export default function App() {
+  // 入力欄の状態管理
   const [part, setPart] = useState(""); //部位
   const [exercise, setExercise] = useState(""); //種目
   const [weight, setWeight] = useState(""); //重量
   const [reps, setReps] = useState(""); //回数
+
+  // 選択中の日付
+  const [selectedDate, setSelectedDate] = useState<string>(() => 
+    new Date().toISOString().slice(0, 10) // アロー関数が一行の場合、波括弧とreturnは省略可能 
+  );
+
+
 
   //  Log型の配列として定義
   const [logs, setLogs] = useState<Log[]>([]); // ログの配列を保持する  ※setLogs→logs の順で実行される訳ではない。set〇〇はあくまでreactにリクエストするだけ
@@ -69,12 +85,12 @@ export default function App() {
 
   //新しいログオブジェクト
   const newLog: Log = {
-    id: crypto.randomUUID(), //一意なIDを生成
+    id: createId(), 
     part: p, // string(p)に変換不要、なぜならpはもともとstring型だから
     exercise: e, 
-    weight: Number(w), //文字列を数値に変換
+    weight: Number(w), //文字列を数値に変換 
     reps: Number(r), 
-    date: new Date().toISOString().slice(0, 10),//ISO形式:YYYY-MM-DD 
+    date: selectedDate, // 選択中の日付で保存
     text: t,
   }
 
@@ -145,20 +161,72 @@ export default function App() {
     //localStorage.setItem("logs", JSON.stringify(newLogs)); // ローカルストレージにも反映
   };
 
+    // "YYYY-MM-DD" → "YYYY/M/D" に変換して表示用にする
+  const formatDisplayDate = (isoDate: string) => {
+    if (!isoDate) return ""; // isoDateが空白なら 何も返さない
+
+    const [y ,m ,d] = isoDate.split("-"); // YYYY-MM-DD を - で分割して配列にする
+    return `${y}/${Number(m)}/${Number(d)}`; // 
+  };
 
 
-        const today = new Date();
-  const currentDate = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
+  // 
+  const filteredLogs = logs.filter((log) => log.date === selectedDate); // 選択中の日付のログだけ抽出
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 // ------------ 画面表示 ------------
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     return (
+
+      // サイト全体のコンテナ
     <div className="space-y-4">
+
+      {/* 日付（カレンダー）入力 */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-slate-100">日付：</span>
+        <input
+          type="date" // ← カレンダーUI
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="rounded-lg border border-slate-500 bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+        />
+      </div>
+
       {/* 入力エリア全体（横並び） */}
       <div className="flex flex-wrap items-center gap-3">
+
         {/* 部位セレクトボックス */}
         <select
           value={part}
@@ -235,17 +303,18 @@ export default function App() {
 
 
       <h2 className="text-lg font-semibold text-slate-100 mb-2">
-        {currentDate} の記録
+        {formatDisplayDate(selectedDate)} の記録
       </h2>
 
 
       {/* ログ一覧 */}
       <ul className="space-y-2">
-        {logs.map((log, index) => (
-          <li
-            key={index}
+        {filteredLogs.map((log, index) => (
+            <li
+            key={log.id} // ← id を key にするとReact的にベスト
             className="flex flex-wrap items-center gap-10 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2"
           >
+
             {editIndex === index ? (
               // ✅ 編集中の行
               <>
