@@ -47,7 +47,7 @@ export default function App() {
 
   // 選択中の日付
   const [selectedDate, setSelectedDate] = useState<string>(() => 
-    new Date().toISOString().slice(0, 10) // アロー関数が一行の場合、波括弧とreturnは省略可能 
+    new Date().toISOString().slice(0, 10) // アロー関数が一行の場合、波括弧とreturnは省略可能 setLogs()
   );
 
 
@@ -55,7 +55,7 @@ export default function App() {
   //  Log型の配列として定義
   const [logs, setLogs] = useState<Log[]>([]); // ログの配列を保持する  ※setLogs→logs の順で実行される訳ではない。set〇〇はあくまでreactにリクエストするだけ
 
-  const [editIndex, setEditIndex] = useState<number | null>(null); // 編集中の行番号（なければ null）
+  const [editingId, setEditingId] = useState<string | null>(null); // IDは文字列型なのでstring | nullは何かというと、文字列かnullのどちらかの型を持つことを意味する    (null)は初期値
   const [editText, setEditText] = useState(""); // 編集用テキスト
 
 
@@ -114,52 +114,50 @@ export default function App() {
 
   // 編集内容を保存する関数（Update：更新）
   const updateLog = () => {
-    if (editIndex === null) return; // 編集対象がない（null）なら何もしない
+    if (!editingId) return; // 編集対象がないなら何もしない
 
     const t = editText.trim(); // 前後の空白を削除
     if (!t) return; // 空文字なら何もしない
 
     // logs配列の該当する行を更新する
     setLogs((prevLogs) => { 
-      const newLogs = prevLogs.map((log, index) => 
-        index === editIndex
-         ? {...log, text:t } : log
+      const newLogs = prevLogs.map((log) => 
+        log.id === editingId // 編集対象のIDと完全に一致するか？
+         ? {...log, text:t } : log // trueならlogオブジェクトを展開しつつtextだけ更新、falseならそのままlogを返す
      );
      
     //JSON.stringifyで文字列に変換しローカルストレージに保存
-     localStorage. setItem("logs", JSON.stringify(newLogs));
+     localStorage.setItem("logs", JSON.stringify(newLogs));
      return newLogs;
     });
 
     // 編集モードを終了
-    setEditIndex(null);
-    setEditText("");
+    setEditingId(null); // 編集対象なしに戻す
+    setEditText(""); // 編集用テキストを空にする
   };
 
 
 
   // 編集を開始する関数
-  const startEdit = (index: number, log: Log) => {
-    setEditIndex(index); // 編集したい行番号を状態に保存
-    setEditText(log.text);    // 編集用テキストの初期値として log を入れる
+  const startEdit = (log: Log) => {
+    setEditingId(log.id); // 編集対象のIDをセット
+    setEditText(log.text);  // 編集用テキストの初期値として log を入れる
   };
 
 
 
-  // 指定した index のログを削除する関数 
-  const handleDelete = (index: number) => {   // returnが無い為、戻り値の型付けは不要 :void(省略可)
+  // 指定したlogを削除する関数
+  const handleDelete = (id: string) => {  
 
 // filter：条件に合うものだけ残して新しい配列を作る
-    setLogs((prevLogs) => { 
-      const newLogs = prevLogs.filter((_, i) => i !== index);// filter:条件に合うものだけ[残して],新しい配列を作る
+    setLogs((prevLogs) => {
+      const newLogs = prevLogs.filter((log) => log.id !== id);// filter:条件に合うものだけ[残して],新しい配列を作る
 
       localStorage.setItem("logs", JSON.stringify(newLogs));
-      return newLogs;
-    })
-    //const newLogs = logs.filter((_, i) => i !== index); // ↑最新の書き方
-    //setLogs(newLogs);
-    //localStorage.setItem("logs", JSON.stringify(newLogs)); // ローカルストレージにも反映
+      return newLogs; 
+    });
   };
+
 
     // "YYYY-MM-DD" → "YYYY/M/D" に変換して表示用にする
   const formatDisplayDate = (isoDate: string) => {
@@ -218,8 +216,8 @@ export default function App() {
         <span className="text-sm text-slate-100">日付：</span>
         <input
           type="date" // ← カレンダーUI
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          value={selectedDate} //選択中の日付
+          onChange={(e) => setSelectedDate(e.target.value)} 
           className="rounded-lg border border-slate-500 bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
         />
       </div>
@@ -309,14 +307,15 @@ export default function App() {
 
       {/* ログ一覧 */}
       <ul className="space-y-2">
+        
         {filteredLogs.map((log, index) => (
             <li
             key={log.id} // ← id を key にするとReact的にベスト
             className="flex flex-wrap items-center gap-10 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2"
           >
-
-            {editIndex === index ? (
-              // ✅ 編集中の行
+            
+            {editingId === log.id ? ( 
+              // ✏️ 編集モードの行
               <>
                 <input
                   value={editText}
@@ -336,7 +335,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => {
-                    setEditIndex(null);
+                    setEditingId(null);
                     setEditText("");
                   }}
                   className="rounded-lg bg-slate-600 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 active:bg-slate-800 transition"
@@ -345,7 +344,7 @@ export default function App() {
                 </button>
               </>
             ) : (
-              // ✅ 通常表示の行
+              // 普通の表示モードの行
               <>
                 <span className="flex-1 text-sm text-slate-100">
                   {index + 1} . 
@@ -353,14 +352,14 @@ export default function App() {
                 </span>
 
                 <button
-                  onClick={() => startEdit(index, log)}
+                  onClick={() => startEdit(log)}
                   className="rounded-lg bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 active:bg-amber-700 transition"
                 >
                   編集
                 </button>
 
                 <button
-                  onClick={() => handleDelete(index)}
+                  onClick={() => handleDelete(log.id)}
                   className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-semibold text-white hover:bg-rose-600 active:bg-rose-700 transition"
                 >
                   削除
