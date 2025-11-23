@@ -11,6 +11,7 @@ type Log = {
   reps: number;
   date: string;
   text: string;
+  memo: string;
 };
 
 
@@ -44,6 +45,7 @@ export default function App() {
   const [exercise, setExercise] = useState(""); //種目
   const [weight, setWeight] = useState(""); //重量
   const [reps, setReps] = useState(""); //回数
+  const [memo, setMemo] = useState(""); //メモ
 
   // 選択中の日付
   const [selectedDate, setSelectedDate] = useState<string>(() => // 初期値を今日の日付にする
@@ -59,6 +61,7 @@ export default function App() {
   // const [editText, setEditText] = useState(""); // 編集用テキスト
   const [editWeight, setEditWeight] = useState(""); // 編集用重量 
   const [editReps, setEditReps] = useState(""); // 編集用回数 保存するときにNumber()で数値に変換する ※何故ならinputのvalueは文字列型だから
+  const [editMemo, setEditMemo] = useState("");
 
 
 
@@ -78,12 +81,13 @@ export default function App() {
     const e = exercise.trim();
     const w = weight.trim();
     const r = reps.trim();
+    const m = memo.trim();
 
-    // どれか一つでも空文字なら何もしない
-    if(!p || !e || !w || !r) return; 
+  // どれか一つでも空文字なら何もしない 
+  if(!p || !e || !w || !r ) return;   //mはそもそも合っても無くてもいいので if条件に入れくても良い
 
-    // 「胸 ベンチプレス 70kg × 10回」みたいな文字列を作る
-  const t = `${p} ${e} ${w}kg x ${r}回`; 
+  // 「胸 ベンチプレス 70kg × 10回」みたいな文字列を作る
+  const t = `${p} ${e} ${w}kg x ${r}回 ${m}`; 
 
   //新しいログオブジェクト
   const newLog: Log = {
@@ -94,6 +98,7 @@ export default function App() {
     reps: Number(r), 
     date: selectedDate, // 選択中の日付で保存
     text: t,
+    memo: m,
   }
 
 
@@ -108,8 +113,10 @@ export default function App() {
     // 入力欄を空にする
     // setPart("");
     // setExercise("");
+    
     setWeight("");
     setReps("");
+    setMemo("");
   };
 
 
@@ -120,6 +127,7 @@ export default function App() {
     setEditingId(log.id); // 編集対象のIDをセット
     setEditWeight(String(log.weight)); //文字列にしてset
     setEditReps(String(log.reps)); 
+    setEditMemo(String(log.memo)); 
   };
 
 
@@ -131,6 +139,8 @@ export default function App() {
 
     const w =editWeight.trim();
     const r =editReps.trim();
+    const m =editMemo.trim();
+
 
     if(!w || !r) return; // 空文字なら何もしない
 
@@ -149,12 +159,13 @@ export default function App() {
         if (log.id !== editingId) return log; // 編集対象でなければそのまま返す 
 
         // 編集対象のログを更新
-        const updateText = `${log.part} ${log.exercise} ${weightNum}kg x ${repsNum}回`;
+        const updateText = `${log.part} ${log.exercise} ${weightNum}kg x ${repsNum}回 ${m}` ;
         return {
           ...log, // logのオブジェクトを展開し、↓の要素だけを更新
           weight: weightNum, 
-          reps: repsNum,     
-          text: updateText,  
+          reps: repsNum,   
+          memo: m,
+          text: updateText, 
         };
       });
         
@@ -168,6 +179,7 @@ export default function App() {
     setEditingId(null); // 編集対象なしに戻す
     setEditWeight(""); 
     setEditReps(""); 
+    setEditMemo("");
   };
 
 
@@ -274,7 +286,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
 
      {/* アプリ全体の“カード”コンテナ */}
-      <div className="w-full max-w-3xl my-4 sm:my-0 space-y-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+      <div className="w-full max-w-3xl my-4 sm:my-0 space-y-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
 
 
 
@@ -318,7 +330,7 @@ export default function App() {
             setPart(newPart);
             setExercise("");
           }} 
-          className="rounded-lg border border-slate-500 bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+          className="rounded-lg border border-white bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
         >
           <option value="">- -部位- -</option>
           <option value="胸">胸</option>
@@ -354,7 +366,7 @@ export default function App() {
             onChange={(e) => setWeight(e.target.value)}
             placeholder="重量"
             type="number"
-            className="w-20 rounded-lg border border-slate-500 bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none  focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+            className="w-20 rounded-lg border border-white bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none  focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
           />
           <span className="text-sm text-slate-200">kg</span>
         </div>
@@ -369,10 +381,27 @@ export default function App() {
             }}
             placeholder="回数"
             type="number"
-            className="w-20 rounded-lg border border-slate-500 bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none focus:ring-2  focus:ring-sky-500 focus:border-sky-500"
+            className="w-20 rounded-lg border border-white bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none focus:ring-2  focus:ring-sky-500 focus:border-sky-500"
           />
           <span className="text-sm text-slate-200">回</span>
         </div>
+
+
+            {/*メモ入力欄 */}
+        <div className="flex items-center gap-1">
+          <input 
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            onKeyDown={(e) => { 
+              if (e.key === "Enter") addLog();
+            }}
+            placeholder="メモ"
+            type="text"
+            className="rounded-lg border border-white px-2 py-1 text-sm  text-slate-100 focus:ring-sky-500 focus:border-sky-500"
+            />
+        </div>
+
+
 
         {/* 追加ボタン */}
         <button
@@ -418,19 +447,20 @@ export default function App() {
             className="flex flex-wrap items-center gap-10 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2"
           >
 
-
+            
             {editingId === log.id ? ( 
-              // ✏️ 編集モードの行
+                // ✏️ 編集モードの行
               <>
                {/* 左側：部位＋種目は固定表示 */}
-               <span className="text-sm text-slate-200 mr-2">
+               <div className="w-full text-sm text-slate-200 font-semibold">
                 {log.part} {log.exercise}
-               </span>
+               </div>
 
 
 
-                {/* 重量編集用 input */}
-                <div className="flex items-center gap-1">
+
+                {/* 重量編集用 */}
+                <div className="flex items-center gap-4 w-full mt-1">
                   <input
                     value={editWeight}
                     onChange={(e) => setEditWeight(e.target.value)}
@@ -444,8 +474,8 @@ export default function App() {
                 </div>
 
 
-                {/* 回数編集用 input */}
-                <div className="flex items-center gap-1">
+                {/* 回数編集用 */}
+                <div className="flex items-center gap-4 w-full mt-1">
                   <input 
                     value={editReps}
                     onChange={(e) => setEditReps(e.target.value)}
@@ -458,6 +488,21 @@ export default function App() {
                     
                     <span className="text-xs text-slate-300">回</span>
                 </div>
+
+                {/* memo編集用 */}
+                <div>
+                  <input
+                    value={editMemo}
+                    onChange={(e) => setEditMemo(e.target.value)}
+                    onKeyDown={(e) => {
+                      if(e.key === "Enter") updateLog();
+                    }}
+                    type="text"
+                    className="rounded-lg border border-white px-2 py-1 text-sm  text-slate-100 focus:ring-sky-500 focus:border-sky-500"
+                  />
+                </div>
+
+                
 
                 
                 
@@ -487,7 +532,7 @@ export default function App() {
 
 
 
-              // 通常表示
+              //デフォルト表示画面
               <>
                 <span className="flex-1 text-sm text-slate-100">
                   {index + 1} . 
