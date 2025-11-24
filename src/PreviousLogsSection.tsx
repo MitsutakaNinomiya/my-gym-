@@ -1,13 +1,17 @@
-import React from "react";
+
 
 //PreviousLogsSectionコンポーネントが受け取る 1件分のlogの型
-type PreviousLog = { 
+type PreviousLog = {
     id: string,
     date: string,
     weight: number,
     reps: number,
     memo: string,
 };
+
+
+
+
 
 //Props(親から子に渡すデータのセット)の型
 type PreviousLogsSectionProps = {
@@ -16,6 +20,8 @@ type PreviousLogsSectionProps = {
     latestDate: string;
     previousLogs: PreviousLog[];
 };
+
+
 
 
 
