@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { DateSection } from "./DateSection";
+import { PreviousLogsSection } from "./PreviousLogsSection"; 
+import { InputSection } from "./InputSection";
 
 // ------------ 型定義（TypeScriptの型） ------------
 
@@ -18,7 +21,7 @@ type Log = {
 // ------------ 定数 ------------
 
 
-// 部位ごとの種目リスト
+// 部位ごとの種目リスト      exercises by part:パート別エクササイズ
 const EXERCISES_BY_PART: Record<string, string[]> = {
   胸: ["ベンチプレス", "ダンベルフライ", "スミスベンチプレス"],
   背中: ["ラットプルダウン", "ベントオーバーローイング", "デッドリフト"],
@@ -137,7 +140,7 @@ export default function App() {
   const updateLog = () => {
     if (!editingId) return; // 編集対象がないなら何もしない
 
-    const w =editWeight.trim();
+    const w =editWeight.trim(); 
     const r =editReps.trim();
     const m =editMemo.trim();
 
@@ -145,7 +148,7 @@ export default function App() {
     if(!w || !r) return; // 空文字なら何もしない
 
     // w と r を数値に変換
-    const weightNum = Number(w);
+    const weightNum = Number(w); //inputが返す値(e.target.value)は必ず"string"(文字列)になるのでNumber型に変換する
     const repsNum = Number(r);
 
     // 数値変換に失敗したら何もせずに終了 isNaNは数値かどうかを判定するメソッド
@@ -215,24 +218,25 @@ export default function App() {
 
 
 
-    // ✅ 選択中の「部位＋種目」の“前回の1日分（全セット）”を取得
+    // 選択中の「部位＋種目」の“前回の1日分（全セット）”を取得
   const previousLogsForSelection: Log[] = (() => { 
 
     // 部位 or 種目がまだ選ばれていなければ前回は出さない
     if (!part || !exercise) return [];
 
-    // ① 同じ部位・種目で、かつ「選択中の日付より前」のログだけに絞る
+    //  同じ部位・種目で、かつ「選択中の日付より前」のログだけに絞る
     const sameExerciseOldLogs = logs.filter(
       (log) =>
         log.part === part &&         //log.partは過去のログの部位、partは選択中の部位
         log.exercise === exercise &&
+        log.memo &&
         log.date < selectedDate // ← ここがポイント！「その日より前」
     );
 
     if (sameExerciseOldLogs.length === 0) return [];
 
-    // ② その中で「一番新しい日付（＝最後の1日）」を探す
-    //    ISO形式(YYYY-MM-DD)は文字列比較でも「後ろのほうが新しい日」になる
+    //  その中で「一番新しい日付（＝最後の1日）」を探す
+    //  ISO形式(YYYY-MM-DD)は文字列比較でも「後ろのほうが新しい日」になる
     let latestDate = sameExerciseOldLogs[0].date; 
     for (const log of sameExerciseOldLogs) {
       if (log.date > latestDate) {
@@ -240,7 +244,7 @@ export default function App() {
       }
     }
 
-    // ③ その「最後の日付」のログだけを前回記録として返す
+    // その「最後の日付」のログだけを前回記録として返す
     return sameExerciseOldLogs.filter((log) => log.date === latestDate);
   })(); // 即時実行関数
 
@@ -278,8 +282,6 @@ export default function App() {
 
 
 
-
-
     return (
 
       // サイト全体のコンテナ
@@ -289,9 +291,14 @@ export default function App() {
       <div className="w-full max-w-3xl my-4 sm:my-0 space-y-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
 
 
+      <DateSection
+      selectedDate={selectedDate}
+      displayDate={formatDisplayDate(selectedDate)}
+      onChangeDate={setSelectedDate}
+      />  
 
 
-      {/* 🗓 カレンダーエリア（このアプリの“入口”） */}
+      {/* 🗓 カレンダーエリア（このアプリの“入口”） 
       <section className="rounded-xl border border-slate-700 bg-slate-900/90 p-4 space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -299,13 +306,11 @@ export default function App() {
             <p className="text-sm text-slate-200 mt-1">
               現在：
               <span className="font-semibold">
-                {formatDisplayDate(selectedDate)} 
-              </span>
-              の記録を表示中
+                {formatDisplayDate(selectedDate)}</span>の記録を表示中
             </p>
           </div>
 
-          {/* 日付（カレンダー）入力 */}
+          
           <input
             type="date" // ← カレンダーUI
             value={selectedDate} //選択中の日付
@@ -314,15 +319,37 @@ export default function App() {
           />
         </div>
       </section>
+      */}
 
 
 
 
 
-      {/* 入力エリア全体（横並び） */}
+
+
+    
+
+
+
+       <InputSection
+        part={part} //part:子コンポーネントが受け取る名前, {part}:親コンポーネントのstateの中身
+        setPart={setPart}
+        exercise={exercise}
+        setExercise={setExercise}
+        weight={weight}
+        setWeight={setWeight}
+        reps={reps}
+        setReps={setReps}
+        memo={memo}
+        setMemo={setMemo}
+        exercisesByPart={EXERCISES_BY_PART}
+        onAddLog={addLog}
+       /> 
+
+      {/* 入力エリア全体（横並び）
       <div className="flex flex-wrap items-center gap-3">
 
-        {/* 部位セレクトボックス */}
+        {/* 部位セレクトボックス 
         <select
           value={part}
           onChange={(e) => {
@@ -340,7 +367,7 @@ export default function App() {
           <option value="腕">腕</option>
         </select>
 
-        {/* 種目セレクトボックス */}
+        {/* 種目セレクトボックス
         <select
           value={exercise}
           onChange={(e) => setExercise(e.target.value)}
@@ -351,6 +378,8 @@ export default function App() {
             {part ? "種目を選択" : "先に部位を選択してください"}
           </option>
 
+
+
           {part &&
             (EXERCISES_BY_PART[part] ?? []).map((name) => (
               <option key={name} value={name}>
@@ -359,7 +388,7 @@ export default function App() {
             ))}
         </select>
 
-        {/* 重量入力欄 */}
+        {/* 重量入力欄 
         <div className="flex items-center gap-1">
           <input
             value={weight}
@@ -371,7 +400,7 @@ export default function App() {
           <span className="text-sm text-slate-200">kg</span>
         </div>
 
-        {/* 回数入力欄 */}
+        {/* 回数入力欄 
         <div className="flex items-center gap-1">
           <input
             value={reps}
@@ -387,7 +416,7 @@ export default function App() {
         </div>
 
 
-            {/*メモ入力欄 */}
+            {/*メモ入力欄 
         <div className="flex items-center gap-1">
           <input 
             value={memo}
@@ -399,11 +428,11 @@ export default function App() {
             type="text"
             className="rounded-lg border border-white px-2 py-1 text-sm  text-slate-100 focus:ring-sky-500 focus:border-sky-500"
             />
-        </div>
+        </div> */}
 
 
 
-        {/* 追加ボタン */}
+        {/* 追加ボタン 
         <button
           onClick={addLog}
           className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 active:bg-sky-700 transition disabled:opacity-50 "
@@ -412,9 +441,36 @@ export default function App() {
         </button>
       </div>
 
-              {/* 前回の記録表示（前回の1日分の全セット） */}
-      {part && exercise && previousLogsForSelection.length > 0 && (
-        <div className="text-sm text-slate-200 space-y-1">
+      */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {part && exercise && previousLogsForSelection.length > 0 && (
+          <PreviousLogsSection
+            part={part}
+            exercise={exercise}
+            latestDate={formatDisplayDate(previousLogsForSelection[0].date)}
+            previousLogs={previousLogsForSelection}
+          />
+        )}
+{/*latestDate:直前の日付 */}
+
+
+
+            {/* 前回の記録表示（前回の1日分の全セット） 
+        {part && exercise && previousLogsForSelection.length > 0 && (
+        <div className="text-sm text-slate-200 opacity-70 space-y-1">
           <div className="font-semibold">
             前回の記録（
             {formatDisplayDate(previousLogsForSelection[0].date)}
@@ -423,12 +479,13 @@ export default function App() {
           <ul className="list-disc pl-5">
             {previousLogsForSelection.map((log, i) => (
               <li key={log.id}>
-                {i + 1}セット目：{log.weight}kg × {log.reps}回
+                {i + 1}セット目：{log.weight}kg × {log.reps}回  メモ : {log.memo}
+               
               </li>
             ))}
           </ul>
         </div>
-      )}
+      )}  */}
 
 
 
