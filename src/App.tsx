@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { DateSection } from "./DateSection";
 import { PreviousLogsSection } from "./PreviousLogsSection"; 
 import { InputSection } from "./InputSection";
+import { LogList } from "./LogList";
 
 // ------------ 型定義（TypeScriptの型） ------------
 
 // トレーニングログの型
-type Log = {
+export type Log = {
   id: string;
   part: string;
   exercise: string;
@@ -344,7 +345,7 @@ export default function App() {
         setMemo={setMemo}
         exercisesByPart={EXERCISES_BY_PART}
         onAddLog={addLog}
-       /> 
+       />
 
       {/* 入力エリア全体（横並び）
       <div className="flex flex-wrap items-center gap-3">
@@ -490,12 +491,43 @@ export default function App() {
 
 
 
+
+
+
+
       <h2 className="text-lg font-semibold text-slate-100 mb-2">
         {formatDisplayDate(selectedDate)} の記録
       </h2>
 
 
-      {/* ログ一覧 */}
+
+
+       <LogList
+  logs={filteredLogs}
+  editingId={editingId}
+  editWeight={editWeight}
+  editReps={editReps}
+  editMemo={editMemo}
+  onChangeEditWeight={setEditWeight}
+  onChangeEditReps={setEditReps}
+  onChangeEditMemo={setEditMemo}
+  onUpdateLog={updateLog}
+  onCancelEdit={() => {
+    setEditingId(null);
+    setEditWeight("");
+    setEditReps("");
+    setEditMemo("");
+  }}
+  onStartEdit={startEdit}
+  onDelete={handleDelete}
+/>       
+
+
+
+
+
+
+      {/* ログ一覧 
       <ul className="space-y-2">
         
         {filteredLogs.map((log, index) => (
@@ -508,7 +540,7 @@ export default function App() {
             {editingId === log.id ? ( 
                 // ✏️ 編集モードの行
               <>
-               {/* 左側：部位＋種目は固定表示 */}
+               {/* 左側：部位＋種目は固定表示 
                <div className="w-full text-sm text-slate-200 font-semibold">
                 {log.part} {log.exercise}
                </div>
@@ -516,7 +548,7 @@ export default function App() {
 
 
 
-                {/* 重量編集用 */}
+                {/* 重量編集用 
                 <div className="flex items-center gap-4 w-full mt-1">
                   <input
                     value={editWeight}
@@ -531,7 +563,7 @@ export default function App() {
                 </div>
 
 
-                {/* 回数編集用 */}
+                {/* 回数編集用 
                 <div className="flex items-center gap-4 w-full mt-1">
                   <input 
                     value={editReps}
@@ -546,7 +578,7 @@ export default function App() {
                     <span className="text-xs text-slate-300">回</span>
                 </div>
 
-                {/* memo編集用 */}
+                {/* memo編集用 
                 <div>
                   <input
                     value={editMemo}
@@ -613,7 +645,9 @@ export default function App() {
             )}
           </li>
         ))}
-      </ul>
+      </ul> */}
+
+
        </div>
     </div>
   );
