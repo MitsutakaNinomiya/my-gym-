@@ -2,12 +2,12 @@ import type { Log } from "./App";
 
 type LogListProps = {
 
-    logs: Log[];     //filteredLogs
-    editingId: string| null; 
+    logs: Log[];     // 選択中の日付のログ一覧
+    editingId: string| null;  // 今編集中のログのid（なければnull）
     editWeight: string;
     editReps: string;
     editMemo: string;
-    onChangeEditWeight: (value: string) => void;
+    onChangeEditWeight: (value: string) => void;  //editWeightが変更されたときに実行される 
     onChangeEditReps: (value: string) => void;
     onChangeEditMemo: (value: string) => void;
     onUpdateLog: () => void;
@@ -42,7 +42,7 @@ export function LogList(props: LogListProps) {
         >
           {editingId === log.id ? (
             <>
-              {/* 編集モード（今のコードほぼコピペ） */}
+              {/* 編集モード*/}
               <div className="w-full text-sm text-slate-200 font-semibold">
                 {log.part} {log.exercise}
               </div>

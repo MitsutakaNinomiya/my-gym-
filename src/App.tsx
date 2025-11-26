@@ -56,7 +56,7 @@ export default function App() {
     new Date().toISOString().slice(0, 10) // アロー関数が一行の場合、波括弧とreturnは省略可能 setLogs()
   );
 
-
+// stateとして持っておきたいものは ”値が変わると画面も変わる”もの
 
   //  Log型の配列として定義
   const [logs, setLogs] = useState<Log[]>([]); // ログの配列を保持する  ※setLogs→logs の順で実行される訳ではない。set〇〇はあくまでreactにリクエストするだけ
@@ -152,9 +152,9 @@ export default function App() {
     const weightNum = Number(w); //inputが返す値(e.target.value)は必ず"string"(文字列)になるのでNumber型に変換する
     const repsNum = Number(r);
 
-    // 数値変換に失敗したら何もせずに終了 isNaNは数値かどうかを判定するメソッド
+    // 数値変換に失敗したら何もせずに終了  "Number.isNaN"は"その値が数値でない場合にtrueを返す関数" 
     if (Number.isNaN(weightNum) || Number.isNaN(repsNum)) {  
-      return alert("重量と回数には有効な数字を入力してください"); // 数字に変換できなかった場合、アラートを表示して終了
+      return alert("重量と回数には有効な数字を入力してください"); // どちらか一つでも数字じゃなかったらreturnで処理終了。
     } 
 
     // logs配列の該当する行を更新する
@@ -181,8 +181,8 @@ export default function App() {
 
 
     setEditingId(null); // 編集対象なしに戻す
-    setEditWeight(""); 
-    setEditReps(""); 
+    setEditWeight("");
+    setEditReps("");
     setEditMemo("");
   };
 
@@ -219,13 +219,13 @@ export default function App() {
 
 
 
-    // 選択中の「部位＋種目」の“前回の1日分（全セット）”を取得
+  // 選択中の「部位＋種目」の“前回の1日分（全セット）”を取得
   const previousLogsForSelection: Log[] = (() => { 
 
-    // 部位 or 種目がまだ選ばれていなければ前回は出さない
+  // 部位 or 種目がまだ選ばれていなければ前回は出さない
     if (!part || !exercise) return [];
 
-    //  同じ部位・種目で、かつ「選択中の日付より前」のログだけに絞る
+  //  同じ部位・種目で、かつ「選択中の日付より前」のログだけに絞る
     const sameExerciseOldLogs = logs.filter(
       (log) =>
         log.part === part &&         //log.partは過去のログの部位、partは選択中の部位
@@ -292,11 +292,17 @@ export default function App() {
       <div className="w-full max-w-3xl my-4 sm:my-0 space-y-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
 
 
+
+      {/* 2. 親（App）が子コンポーネントに “荷物として渡す” */}
       <DateSection
       selectedDate={selectedDate}
       displayDate={formatDisplayDate(selectedDate)}
-      onChangeDate={setSelectedDate}
+      onChangeDate={setSelectedDate}  
       />  
+       {/* onChangeDate=にするのは理由があり、子にはsetXxxで渡すのは良くないため。  何故？→更新関数だと誤解されるから Reactではイベント=onから始めるのがルールだから */}
+
+
+
 
 
       {/* 🗓 カレンダーエリア（このアプリの“入口”） 
@@ -520,12 +526,7 @@ export default function App() {
   }}
   onStartEdit={startEdit}
   onDelete={handleDelete}
-/>       
-
-
-
-
-
+/>   
 
       {/* ログ一覧 
       <ul className="space-y-2">
@@ -537,10 +538,11 @@ export default function App() {
           >
 
             
-            {editingId === log.id ? ( 
+            {editingId === log.id ?  (
                 // ✏️ 編集モードの行
+              
               <>
-               {/* 左側：部位＋種目は固定表示 
+               部位・種目を横並びに固定表示
                <div className="w-full text-sm text-slate-200 font-semibold">
                 {log.part} {log.exercise}
                </div>
@@ -601,6 +603,7 @@ export default function App() {
                 >
                   保存
                 </button>
+
                 <button
                   onClick={() => {
                     setEditingId(null);
