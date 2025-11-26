@@ -1,15 +1,16 @@
 // DateSection.tsx
+//日付選択できるコンポーネント
 
-
-//カレンダー部分をコンポーネントに分割
-
+// 1.子コンポーネント側で “Props の型” を定義する → 親側で渡す準備をしに行く
 // Props（プロップス） = 親コンポーネント(App) から受け取る「引数」の型
 type DateSectionProps = {
   selectedDate: string;                // 選択中の日付 (YYYY-MM-DD)
   displayDate: string;                 // 表示用の日付 (YYYY/M/D)
-  onChangeDate: (value: string) => void; // 日付が変わったときに呼ぶ関数
+  onChangeDate: (value: string) => void; // 日付が変わったときに親へ渡す関数
 };
 
+
+// 3. 親コンポーネントから受け取る
 export function DateSection({
   selectedDate,
   displayDate,
@@ -21,7 +22,7 @@ export function DateSection({
         <div>
           <p className="text-xs text-slate-400">トレーニングする日を選択</p>
           <p className="text-sm text-slate-200 mt-1">
-            現在：
+            現在:
             <span className="font-semibold">{displayDate}</span>の記録を表示中
           </p>
         </div>
